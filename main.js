@@ -89,6 +89,21 @@ scene.add(backLight)
 new OrbitControls(camera, renderer.domElement)
 camera.position.z = 50
 
+const starGeometry = new THREE.BufferGeometry()
+const starMaterial = new THREE.PointsMaterial({color: 0xffffff})
+const starVerticies = []
+
+for (let i = 0; i < 10000; i++) {
+  const x = (Math.random() - 0.5) * 2000
+  const y = (Math.random() - 0.5) * 2000
+  const z = (Math.random() - 0.5) * 2000
+  starVerticies.push(x, y, z)  
+}
+
+starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVerticies, 3))
+const Stars = new THREE.Points(starGeometry, starMaterial)
+scene.add(Stars)
+
 const mouse = 
 {
   x: undefined,
@@ -173,6 +188,8 @@ function animate(){
 
   }
 
+  Stars.rotation.x += 0.0006
+
 }
 
 animate()
@@ -181,4 +198,27 @@ addEventListener('mousemove', (event) => {
   mouse.x = (event.clientX / innerWidth) * 2 - 1
   mouse.y = -(event.clientY / innerHeight) * 2 + 1 
   })
+
+gsap.to('#OmerKaanCoskun', {opacity: 1, duration: 1.75, y: 0, ease: 'expo'})
+gsap.to('#EntranceParagraph', {opacity: 1, duration: 1.75, y: 0, delay: 0.3, ease: 'expo'})
+gsap.to('#EntranceButton', {opacity: 1, duration: 1.75, y: 0, delay: 0.6, ease: 'expo'})
+
+document.querySelector('#EntranceButton').addEventListener('click', (e) => 
+{
+  e.preventDefault(), 
+  gsap.to('#container', {opacity: 0})
+  gsap.to(camera.position, {z: 25, ease: 'power3.inOut', duration: 1.7})
+  gsap.to(camera.rotation, {x: 1.57, ease: 'power3.inOut',duration: 1.85 /*1.57rad is = 90deg*/})
+  gsap.to(camera.position, {y: 1500, ease: 'expo.in', duration: 2, delay: 1.85, onComplete: () => 
+  {
+    window.location = 'https://www.linkedin.com/in/0xm3rk44n/'
+  }
+})
+})
+
+addEventListener('resize', () => 
+{camera.aspect = innerWidth / innerHeight, 
+camera.updateProjectionMatrix(), 
+renderer.setSize(innerWidth, innerHeight)
+})
  
