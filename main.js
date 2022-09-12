@@ -211,7 +211,7 @@ document.querySelector('#EntranceButton').addEventListener('click', (e) =>
   gsap.to(camera.rotation, {x: 1.57, ease: 'power3.inOut',duration: 1.85 /*1.57rad is = 90deg*/})
   gsap.to(camera.position, {y: 1500, ease: 'expo.in', duration: 2, delay: 1.85, onComplete: () => 
   {
-    window.location = 'https://www.linkedin.com/in/0xm3rk44n/'
+    window.location = 'http://www.omerkaancoskun.com/okc-site.html'
   }
 })
 })
