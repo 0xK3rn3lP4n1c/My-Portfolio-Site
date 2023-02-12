@@ -14,7 +14,7 @@ Are you tired of boring and static website entrance animations? Look no further!
     
 ```bash
 
-git clone https://github.com/YOUR-USERNAME/site-entrance-animation.git
+git clone https://github.com/Kazuto-Kawahara/site-entrance-animation.git
 
 ```
 
