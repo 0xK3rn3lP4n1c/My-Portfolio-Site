@@ -1,0 +1,80 @@
+---
+import { getLangFromUrl, useTranslations, localizedPath, type Lang } from '../i18n/ui';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const p = (path: string) => localizedPath(path, lang);
+
+const links = [
+  { href: p('/'), label: t('nav.home') },
+  { href: p('/projects'), label: t('nav.projects') },
+  { href: p('/blog'), label: t('nav.blog') },
+];
+
+// Language toggle: swap between tr (root) and en (/en) for the current path.
+const rest = Astro.url.pathname.replace(/^\/en/, '') || '/';
+const other: Lang = lang === 'en' ? 'tr' : 'en';
+const otherHref = localizedPath(rest, other);
+
+const current = Astro.url.pathname;
+---
+
+<header class="site-header">
+  <div class="container bar">
+    <a class="brand mono" href={p('/')}>OKC<span class="brand-dot">_</span></a>
+    <nav aria-label="Primary">
+      <ul>
+        {links.map((l) => (
+          <li>
+            <a href={l.href} aria-current={current === l.href ? 'page' : undefined}>{l.label}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <a class="lang mono" href={otherHref} hreflang={other} aria-label={`Switch to ${other.toUpperCase()}`}>
+      {other.toUpperCase()}
+    </a>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(7, 11, 18, 0.72);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-m);
+    min-height: 3.4rem;
+  }
+  .brand {
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: 0.05em;
+    color: var(--text);
+  }
+  .brand-dot { color: var(--cyan); }
+  nav { margin-inline-start: auto; }
+  nav ul { list-style: none; display: flex; gap: var(--space-m); padding: 0; }
+  nav a {
+    font-family: var(--font-mono);
+    font-size: var(--step--1);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  nav a:hover, nav a[aria-current='page'] { color: var(--cyan); }
+  .lang {
+    font-size: var(--step--1);
+    color: var(--text-faint);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-s);
+    padding: 0.2rem 0.5rem;
+  }
+  .lang:hover { color: var(--cyan); border-color: var(--cyan-dim); }
+</style>

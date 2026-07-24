@@ -1,0 +1,18 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EntryList from '../../components/EntryList.astro';
+import { useTranslations } from '../../i18n/ui';
+
+const t = useTranslations('tr');
+const items = (await getCollection('projects')).filter((e) => e.data.lang === 'tr' && !e.data.draft);
+---
+<BaseLayout title={`${t('projects.title')} — Ömer Kaan Coşkun`}>
+  <section class="container section">
+    <p class="eyebrow">{t('projects.subtitle')}</p>
+    <h1>{t('projects.title')}</h1>
+    <div class="spacer"></div>
+    <EntryList base="/projects" items={items} emptyText="Yakında." />
+  </section>
+</BaseLayout>
+<style>.section { padding-block: var(--space-l); } .spacer { height: var(--space-m); }</style>

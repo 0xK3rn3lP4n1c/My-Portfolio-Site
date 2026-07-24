@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (also generates content/types)
+        run: npm run build
+
+      - name: Type check
+        run: npm run check
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Set up Chrome (for e2e)
+        id: chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Functional (e2e) tests
+        run: npm run test:e2e
+        env:
+          PUPPETEER_EXECUTABLE_PATH: ${{ steps.chrome.outputs.chrome-path }}
+
+      - name: Dependency audit (informational)
+        run: npm audit --audit-level=high || true

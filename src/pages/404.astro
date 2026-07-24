@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="404 — Ömer Kaan Coşkun">
+  <section class="container nf">
+    <p class="eyebrow">Error · 404</p>
+    <h1 class="mono">404 / Sayfa bulunamadı</h1>
+    <p class="dim">Aradığınız kaynak bulunamadı. · The requested resource was not found.</p>
+    <a class="btn" href="/">← Ana sayfa / Home</a>
+  </section>
+</BaseLayout>
+<style>
+  .nf { min-height: 60vh; display: flex; flex-direction: column; justify-content: center; gap: var(--space-s); }
+  .dim { color: var(--text-dim); }
+  .btn { align-self: flex-start; margin-top: var(--space-s); }
+</style>

@@ -1,0 +1,26 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import EntryList from '../components/EntryList.astro';
+import { useTranslations } from '../i18n/ui';
+
+const t = useTranslations('tr');
+const featured = (await getCollection('projects')).filter(
+  (e) => e.data.lang === 'tr' && !e.data.draft
+);
+---
+<BaseLayout title="Ömer Kaan Coşkun — Siber Güvenlik & OT">
+  <Hero />
+  <section id="after-hero" class="container section">
+    <h2>{t('projects.title')}</h2>
+    <p class="eyebrow">{t('projects.subtitle')}</p>
+    <div class="spacer"></div>
+    <EntryList base="/projects" items={featured} emptyText="Yakında." />
+  </section>
+</BaseLayout>
+
+<style>
+  .section { padding-block: var(--space-l); }
+  .spacer { height: var(--space-m); }
+</style>

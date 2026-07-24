@@ -1,0 +1,49 @@
+/* Design tokens — cybersecurity / OT palette.
+   Dark, terminal-adjacent. Navy/near-black base, cyan signal, red anomaly. */
+:root {
+  /* Base surfaces */
+  --bg: #070b12;            /* near-black navy */
+  --bg-elev: #0d1420;       /* raised panels */
+  --bg-elev-2: #131c2b;
+  --grid-line: rgba(53, 230, 212, 0.08);
+  --border: #1e2a3d;
+
+  /* Text */
+  --text: #dbe4f0;
+  --text-dim: #8fa2ba;
+  --text-faint: #5c6f88;
+
+  /* Signal accents */
+  --cyan: #35e6d4;          /* primary accent */
+  --cyan-bright: #6ffff0;
+  --cyan-dim: #1c8f86;
+  --blue: #4d9fff;
+  --anomaly: #ff4d5e;       /* red anomaly */
+  --anomaly-dim: #b3313d;
+
+  /* Effects */
+  --glow-cyan: 0 0 20px rgba(53, 230, 212, 0.35);
+  --glow-anomaly: 0 0 18px rgba(255, 77, 94, 0.4);
+
+  /* Typography */
+  --font-mono: 'Ubuntu Mono', ui-monospace, 'Cascadia Code', 'JetBrains Mono', monospace;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* Scale & rhythm */
+  --step--1: clamp(0.83rem, 0.8rem + 0.15vw, 0.92rem);
+  --step-0: clamp(1rem, 0.95rem + 0.25vw, 1.12rem);
+  --step-1: clamp(1.3rem, 1.2rem + 0.5vw, 1.6rem);
+  --step-2: clamp(1.7rem, 1.5rem + 1vw, 2.4rem);
+  --step-3: clamp(2.2rem, 1.8rem + 2.2vw, 3.6rem);
+
+  --space-xs: 0.5rem;
+  --space-s: 0.85rem;
+  --space-m: 1.4rem;
+  --space-l: 2.4rem;
+  --space-xl: 4rem;
+
+  --radius: 10px;
+  --radius-s: 6px;
+  --maxw: 68rem;
+  --maxw-prose: 44rem;
+}
