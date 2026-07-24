@@ -1,0 +1,123 @@
+---
+// Road of the Ronin — playable 2-player demo embedded from the Astro island.
+---
+<div class="ronin" id="ronin-root">
+  <div class="stage">
+    <!-- HUD overlay -->
+    <div class="hud" aria-hidden="true">
+      <div class="health player">
+        <div class="health-bg"></div>
+        <div id="ronin-player-health" class="health-fill"></div>
+      </div>
+      <div id="ronin-timer" class="timer mono">60</div>
+      <div class="health enemy">
+        <div class="health-bg"></div>
+        <div id="ronin-enemy-health" class="health-fill"></div>
+      </div>
+    </div>
+
+    <div id="ronin-display" class="display mono">Berabere</div>
+    <canvas id="ronin-canvas" aria-label="Road of the Ronin oyun alanı"></canvas>
+
+    <!-- Start / restart overlay -->
+    <div id="ronin-overlay" class="overlay">
+      <p class="mono title">ROAD OF THE RONIN</p>
+      <button id="ronin-start" class="btn" type="button">Başlat</button>
+    </div>
+  </div>
+
+  <div class="controls mono">
+    <div><strong>1. Oyuncu — Ronin:</strong> A / D hareket · W zıpla · Boşluk saldırı</div>
+    <div><strong>2. Oyuncu — Ashura:</strong> ← / → hareket · ↑ zıpla · Enter saldırı</div>
+  </div>
+</div>
+
+<script>
+  import { createRoninGame, type RoninGame } from './ronin/engine';
+
+  const root = document.getElementById('ronin-root');
+  const canvas = document.getElementById('ronin-canvas') as HTMLCanvasElement | null;
+  const overlay = document.getElementById('ronin-overlay');
+  const startBtn = document.getElementById('ronin-start');
+  const playerHealth = document.getElementById('ronin-player-health');
+  const enemyHealth = document.getElementById('ronin-enemy-health');
+  const timer = document.getElementById('ronin-timer');
+  const displayText = document.getElementById('ronin-display');
+
+  if (root && canvas && overlay && startBtn && playerHealth && enemyHealth && timer && displayText) {
+    let game: RoninGame | null = null;
+
+    function resetHud() {
+      playerHealth!.style.width = '100%';
+      enemyHealth!.style.width = '100%';
+      timer!.innerHTML = '60';
+      displayText!.style.display = 'none';
+    }
+
+    function play() {
+      game?.destroy();
+      resetHud();
+      game = createRoninGame({
+        elements: {
+          canvas: canvas!, playerHealth: playerHealth!, enemyHealth: enemyHealth!,
+          timer: timer!, displayText: displayText!,
+        },
+      });
+      overlay!.classList.add('hidden');
+      game.start();
+    }
+
+    startBtn.addEventListener('click', play);
+
+    // Free keyboard listeners / loop when the game scrolls out of view.
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting && game) { game.destroy(); game = null; overlay!.classList.remove('hidden'); resetHud(); }
+    }, { threshold: 0.15 });
+    io.observe(root);
+  }
+</script>
+
+<style>
+  .ronin { display: flex; flex-direction: column; gap: var(--space-s); }
+  .stage {
+    position: relative;
+    width: 100%;
+    max-width: 1024px;
+    margin-inline: auto;
+    aspect-ratio: 1024 / 576;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #000;
+  }
+  canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+  /* HUD */
+  .hud { position: absolute; top: 0; left: 0; right: 0; z-index: 2; display: flex; align-items: center; padding: 14px; gap: 6px; }
+  .health { position: relative; width: 100%; height: 26px; border: 3px solid var(--text); }
+  .health.player { border-right: none; }
+  .health.enemy { border-left: none; }
+  .health-bg { position: absolute; inset: 0; background: var(--anomaly); }
+  .health-fill { position: absolute; top: 0; bottom: 0; right: 0; width: 100%; background: var(--cyan); transition: width 0.2s linear; }
+  .health.enemy .health-fill { right: auto; left: 0; }
+  .timer {
+    flex-shrink: 0; width: 84px; height: 44px; display: flex; align-items: center; justify-content: center;
+    background: rgba(7, 11, 18, 0.75); color: var(--text); border: 3px solid var(--text); font-size: 1.1rem;
+  }
+  .display {
+    position: absolute; inset: 0; z-index: 3; display: none; align-items: center; justify-content: center;
+    color: var(--cyan-bright); font-size: clamp(1.2rem, 4vw, 2.4rem); text-align: center; text-shadow: 0 0 20px rgba(53,230,212,0.6);
+  }
+
+  /* Overlay */
+  .overlay {
+    position: absolute; inset: 0; z-index: 4; display: flex; flex-direction: column; gap: var(--space-m);
+    align-items: center; justify-content: center; background: rgba(7, 11, 18, 0.72); backdrop-filter: blur(3px);
+    transition: opacity 0.3s ease;
+  }
+  .overlay.hidden { opacity: 0; pointer-events: none; }
+  .overlay .title { letter-spacing: 0.2em; color: var(--cyan); }
+
+  .controls { font-size: var(--step--1); color: var(--text-dim); display: flex; flex-direction: column; gap: 4px; }
+  .controls strong { color: var(--text); }
+</style>

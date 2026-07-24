@@ -1,0 +1,166 @@
+---
+import { getLangFromUrl, useTranslations } from '../i18n/ui';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+<section class="hero" id="entrance-hero" aria-labelledby="hero-title">
+  <!-- The "OT Threat Map" Three.js island mounts into #entrance.
+       A static CSS grid stands in until it loads / as the reduced-motion fallback. -->
+  <div id="entrance" class="entrance-bg" aria-hidden="true"></div>
+  <div class="container hero-inner">
+    <p class="eyebrow">{t('home.eyebrow')}</p>
+    <h1 id="hero-title">Ömer Kaan Coşkun</h1>
+    <p class="lede prose">{t('home.intro')}</p>
+    <!-- Fallback is a same-page anchor; JS upgrades this to the animated fly-through. -->
+    <a class="btn" id="entrance-start" href="#after-hero">{t('home.enter')} →</a>
+  </div>
+  <div class="enter-hint mono" aria-hidden="true">↓</div>
+</section>
+
+<script>
+  import type { ThreatMap } from './three/otThreatMap';
+
+  const hero = document.getElementById('entrance-hero');
+  const el = document.getElementById('entrance');
+  const startBtn = document.getElementById('entrance-start') as HTMLAnchorElement | null;
+  const html = document.documentElement;
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const alreadyEntered = sessionStorage.getItem('okc-entered') === '1';
+
+  let map: ThreatMap | null = null;
+  let entering = false;
+
+  function initScene() {
+    if (!el || reduce) return;
+    // Dynamic import: Three.js (~130 KB gz) is fetched only when the scene actually
+    // initialises — reduced-motion users and returning-in-session visitors never pay for it.
+    const boot = async () => {
+      const { initThreatMap } = await import('./three/otThreatMap');
+      map = initThreatMap(el as HTMLElement);
+    };
+    if ('requestIdleCallback' in window) (window as any).requestIdleCallback(boot, { timeout: 1200 });
+    else setTimeout(boot, 200);
+  }
+
+  // Reveal the site: unlock scroll, fade the overlay out, then remove it and free the GPU.
+  function reveal() {
+    html.classList.remove('intro-locked');
+    hero?.classList.add('entered');
+    sessionStorage.setItem('okc-entered', '1');
+    window.setTimeout(() => {
+      hero?.classList.remove('intro-mode');
+      if (hero) hero.style.display = 'none';
+      map?.destroy();
+      map = null;
+      window.scrollTo(0, 0);
+    }, 600);
+  }
+
+  // Fly-through: zoom the title toward the viewer + dive the camera past it, then reveal.
+  function enter() {
+    if (entering) return;
+    entering = true;
+    teardownTriggers();
+    hero?.classList.add('entering');
+    const done = map ? map.launch() : new Promise<void>((r) => setTimeout(r, 900));
+    done.then(() => setTimeout(reveal, 140));
+  }
+
+  // In intro mode, a click, a scroll, a swipe, or Enter/Space/↓ all "enter" the site.
+  const onKey = (e: KeyboardEvent) => {
+    if (['Enter', ' ', 'ArrowDown', 'PageDown'].includes(e.key)) { e.preventDefault(); enter(); }
+  };
+  const onWheel = (e: Event) => { e.preventDefault(); enter(); };
+  const onStartClick = (e: MouseEvent) => { e.preventDefault(); enter(); };
+  function setupTriggers() {
+    startBtn?.addEventListener('click', onStartClick);
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('wheel', onWheel, { passive: false });
+    window.addEventListener('touchmove', onWheel, { passive: false });
+  }
+  function teardownTriggers() {
+    startBtn?.removeEventListener('click', onStartClick);
+    window.removeEventListener('keydown', onKey);
+    window.removeEventListener('wheel', onWheel);
+    window.removeEventListener('touchmove', onWheel);
+  }
+
+  if (hero && !reduce && !alreadyEntered) {
+    // Full-screen intro experience.
+    hero.classList.add('intro-mode');
+    html.classList.add('intro-locked');
+    initScene();
+    setupTriggers();
+  } else {
+    // Returning this session, or reduced motion: normal page, animated hero as background.
+    initScene();
+  }
+</script>
+
+<style>
+  .hero { position: relative; overflow: hidden; }
+  .hero-inner {
+    position: relative;
+    z-index: 1;
+    min-height: min(78vh, 640px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-m);
+    padding-block: var(--space-xl);
+    transition: transform 1s cubic-bezier(0.6, 0, 0.35, 1), opacity 0.9s ease, filter 1s ease;
+    will-change: transform, opacity;
+  }
+  .lede { color: var(--text-dim); font-size: var(--step-1); }
+  .btn { align-self: flex-start; margin-top: var(--space-s); }
+
+  /* Full-screen intro overlay (added by JS). Opaque base so the page behind
+     it is fully hidden — the WebGL canvas clears to transparent. */
+  .hero.intro-mode {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    height: 100dvh;
+    background: var(--bg);
+  }
+  .hero.intro-mode .hero-inner { min-height: 100dvh; }
+
+  /* Fly-through: the title zooms toward the viewer and dissolves as the camera passes it. */
+  .hero.entering .hero-inner { transform: scale(2.6); opacity: 0; filter: blur(3px); }
+  .hero.entering .enter-hint { opacity: 0; }
+  .hero.entered { opacity: 0; transition: opacity 0.6s ease; pointer-events: none; }
+
+  /* "Enter" cue — only shown during the full-screen intro. */
+  .enter-hint { display: none; }
+  .hero.intro-mode .enter-hint {
+    display: block;
+    position: absolute;
+    left: 50%;
+    bottom: 1.4rem;
+    transform: translateX(-50%);
+    color: var(--text-faint);
+    font-size: 1.2rem;
+    animation: bob 2s ease-in-out infinite;
+  }
+  @keyframes bob {
+    0%, 100% { transform: translate(-50%, 0); }
+    50% { transform: translate(-50%, 7px); }
+  }
+
+  /* Static stand-in: dim navy grid with a cyan horizon glow + vignette. */
+  .entrance-bg {
+    position: absolute; inset: 0; z-index: 0;
+    background:
+      radial-gradient(120% 80% at 50% 120%, rgba(53, 230, 212, 0.12), transparent 60%),
+      linear-gradient(var(--grid-line) 1px, transparent 1px) 0 0 / 44px 44px,
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px) 0 0 / 44px 44px,
+      var(--bg);
+    mask-image: radial-gradient(130% 100% at 50% 60%, #000 55%, transparent 100%);
+  }
+  .entrance-bg.webgl-active { background: none; mask-image: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-inner { transition: none; }
+    .hero.intro-mode .enter-hint { animation: none; }
+  }
+</style>

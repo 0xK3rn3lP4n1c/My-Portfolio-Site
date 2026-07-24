@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://omerkaancoskun.com.tr/sitemap-index.xml

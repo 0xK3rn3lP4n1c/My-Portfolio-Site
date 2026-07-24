@@ -1,0 +1,38 @@
+---
+import { getLangFromUrl, useTranslations } from '../i18n/ui';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+const year = new Date().getFullYear();
+
+const socials = [
+  { href: 'https://github.com/0xK3rn3lP4n1c', label: 'GitHub' },
+  { href: 'https://www.linkedin.com/in/%C3%B6mer-kaan-co%C5%9Fkun-a2a49b15a/', label: 'LinkedIn' },
+];
+---
+
+<footer class="site-footer">
+  <div class="container inner">
+    <p class="mono name">Ömer Kaan Coşkun</p>
+    <ul class="socials">
+      {socials.map((s) => (
+        <li><a href={s.href} rel="me noopener" target="_blank">{s.label}</a></li>
+      ))}
+    </ul>
+    <p class="copy">© {year} · {t('footer.rights')}</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid var(--border);
+    margin-top: var(--space-xl);
+    padding-block: var(--space-l);
+    color: var(--text-faint);
+  }
+  .inner { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-m); }
+  .name { color: var(--text-dim); }
+  .socials { list-style: none; display: flex; gap: var(--space-m); padding: 0; margin-inline-start: auto; }
+  .socials a { font-family: var(--font-mono); font-size: var(--step--1); color: var(--text-dim); }
+  .socials a:hover { color: var(--cyan); }
+  .copy { font-family: var(--font-mono); font-size: var(--step--1); width: 100%; }
+</style>

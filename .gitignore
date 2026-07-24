@@ -1,3 +1,10 @@
+# Obsidian planning vault (local-only workspace, not shipped)
+vault/
+
+# Local tooling / editor config
+.obsidian/
+.claude/
+
 # Logs
 logs
 *.log
