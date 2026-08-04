@@ -1,0 +1,12 @@
+Substation SCADA — web-facing backup drop
+==========================================
+
+Do NOT rely on this directory. It is a temporary staging area left over
+from the 2016 RTU/HMI migration and should have been deleted long ago.
+
+Contents:
+  notes.txt                operator handover notes
+  hmi_backup_2016.tar.gz   snapshot of the operator HMI project
+
+If you can read this from the public internet, the network segmentation
+is already broken. That is, more or less, the whole point.

@@ -1,0 +1,166 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { FLAG } from '../../components/lab/substationEngine';
+---
+<BaseLayout
+  title="Debrief — Bir trafo merkezini karartmak | OT Lab"
+  description="Az önce yeniden oynadığınız senaryonun gerçeği: 2015 BlackEnergy ve 2016 Industroyer Ukrayna elektrik şebekesi saldırıları — teknikler, protokoller ve savunma."
+  noindex={true}
+>
+  <article class="container prose debrief">
+    <p class="eyebrow">OT LAB · DEBRIEF</p>
+    <h1>Bir trafo merkezini karartmak: 2015 &amp; 2016, Ukrayna</h1>
+
+    <div class="flag-badge mono">
+      <span class="ok">✓ Lab tamamlandı</span>
+      <code>{FLAG}</code>
+    </div>
+
+    <p class="lede">
+      HMI'da yaptığınız şey bir oyun değildi — iki kez gerçekten yaşandı. Aşağıda, az önce
+      konsolda uyguladığınız adımların Ukrayna elektrik şebekesine yapılan iki dönüm noktası
+      saldırısıyla nasıl birebir örtüştüğünü ve bir savunmacı olarak bu zincirin her halkasını
+      nerede kırabileceğinizi bulacaksınız.
+    </p>
+
+    <h2>Az önce ne yaptınız?</h2>
+    <p>Konsoldaki her komut, gerçek bir OT saldırı tekniğine karşılık geliyor:</p>
+    <div class="table-wrap">
+      <table class="killchain">
+        <thead>
+          <tr><th>Konsol adımı</th><th>Gerçek teknik</th><th>Saldırı</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>scan</code></td><td>OT servislerinin keşfi (TCP/2404, TCP/102)</td><td>Her ikisi</td></tr>
+          <tr><td><code>iec104 interrogate</code></td><td>IEC-104 genel sorgulama ile süreç görüntüsünün dökümü</td><td>Industroyer</td></tr>
+          <tr><td><code>iec61850 write …Mod off</code></td><td>Koruma rölesinin MMS üzerinden devre dışı bırakılması</td><td>Industroyer (+ CVE-2015-5374)</td></tr>
+          <tr><td><code>iec104 select / execute off</code></td><td>Seç-önce-işlet (SBO) ile kesici açma komutu</td><td>Her ikisi</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="incidents">
+      <section class="incident">
+        <p class="tag-year mono">23 ARALIK 2015</p>
+        <h2>BlackEnergy — elle yapılan saldırı</h2>
+        <ul>
+          <li><strong>Etki:</strong> 3 dağıtım şirketi (oblenergo), ~230.000 müşteri, 1–6 saat kesinti.</li>
+          <li><strong>Erişim:</strong> Hedefli oltalama (makrolu Office belgesinde BlackEnergy3), kimlik bilgisi hırsızlığı, aylarca süren keşif ve VPN ile ICS ağına giriş.</li>
+          <li><strong>Kesme:</strong> Saldırganlar operatörlerin <em>kendi</em> SCADA/HMI istemcilerini uzaktan kullanarak kesicileri elle açtı — klasik bir "living-off-the-land".</li>
+          <li><strong>Ardından:</strong> KillDisk ile iş istasyonları silindi, seri-ethernet çeviricilere zararlı donanım yazılımı yüklendi, çağrı merkezine telefon DoS'u, saha UPS'lerine müdahale — hepsi kurtarmayı yavaşlatmak için.</li>
+        </ul>
+        <p class="takeaway">Protokol kötücülü yazılımı yok; sadece meşru araçlar ve çalınan erişim. Ders: <strong>erişim = kontrol</strong>.</p>
+      </section>
+
+      <section class="incident">
+        <p class="tag-year mono">17 ARALIK 2016</p>
+        <h2>Industroyer / CrashOverride — otomatikleşen saldırı</h2>
+        <ul>
+          <li><strong>Etki:</strong> Kyiv, Pivnichna (Kuzey) trafo merkezi; şehrin yaklaşık beşte biri ~1 saat karanlıkta.</li>
+          <li><strong>Yenilik:</strong> Doğrudan <em>şebeke protokollerini</em> konuşan ilk kötücül yazılım. Modüler yükler: IEC 60870-5-101 (seri), IEC 60870-5-104 (TCP/2404), IEC 61850 MMS (TCP/102), OPC DA.</li>
+          <li><strong>Röle susturma:</strong> Siemens SIPROTEC rölelerini hizmet dışı bırakan bir DoS modülü (CVE-2015-5374) — tıpkı sizin koruma "Mod" değerini kapatmanız gibi.</li>
+          <li><strong>Otonomi:</strong> Ortamı kendi kendine enumere edip kesici açma komutlarını ölçeklenebilir biçimde gönderdi. 2022'de <strong>Industroyer2</strong> aynı deseni tek bir trafo merkezine, IEC-104 konfigürasyonu gömülü olarak tekrarladı.</li>
+        </ul>
+        <p class="takeaway">2015'in elle yaptığını 2016 koda döktü. Ders: <strong>koruma katmanı kapatılabilir; protokolde kimlik doğrulama yok</strong>.</p>
+      </section>
+    </div>
+
+    <h2>Neden işe yaradı</h2>
+    <ul>
+      <li>OT protokolleri tasarım gereği kimlik doğrulama ve şifreleme içermez — erişebilen komut verir.</li>
+      <li>Düz (flat) ağlar ve IT–OT köprüleri, oltalamanın kontrol ağına kadar ulaşmasına izin verdi.</li>
+      <li>Koruma röleleri son savunma hattıdır — ve uzaktan kapatılabilir ya da bozulabilir.</li>
+      <li>Silinen iş istasyonları ve bozulan haberleşme, kurtarmayı saatlerce geciktirdi.</li>
+    </ul>
+
+    <h2>Savunmacı için çıkarımlar</h2>
+    <ul>
+      <li><strong>Segmentasyon:</strong> Purdue modeli, OT DMZ; dışarı telemetriyi tek yönlü ağ geçidi / veri diyotu ile taşıyın.</li>
+      <li><strong>Deny-by-default doğu-batı:</strong> IEC-104 / IEC 61850 akışlarını yalnızca bilinen mühendislik istasyonları (EWS) ↔ RTU çiftleri için beyaz listeye alın.</li>
+      <li><strong>Tespit:</strong> Yetkisiz kaynaklardan gelen kontrol komutlarını ve <code>LLN0.Mod</code> gibi koruma değişikliklerini alarmlayın; IEC-104 ASDU ve 61850 GOOSE trafiğini bazlayın.</li>
+      <li><strong>Sıkılaştırma:</strong> Röleleri yamayın (SIPROTEC), kullanılmayan servisleri kapatın, EWS'leri koruyun, uzaktan erişimi MFA + jump host ardına alın.</li>
+      <li><strong>Dayanıklılık:</strong> Manuel/yerel kontrol yedeği, RTU ve röle konfigürasyonlarının çevrimdışı yedekleri, prova edilmiş olay müdahale runbook'ları.</li>
+    </ul>
+
+    <div class="callout warn">
+      <strong>⚠ Sorumlu kullanım.</strong> Aşağıdaki komutları asla yetkisiz, üretimdeki bir OT ağına
+      karşı çalıştırmayın. Aktif tarama bile hassas cihazları çökertebilir; yalnızca yazılı yetki ve
+      planlı bir bakım penceresiyle, tercihen pasif yöntemlerle ilerleyin.
+    </div>
+
+    <h2>Araç seti / cheat-sheet</h2>
+    <h3>Keşif &amp; enumerasyon (kırmızı takım)</h3>
+    <pre class="term"><code># Önce pasif. Aktif taramalar kırılgan OT cihazlarını düşürebilir.
+nmap -Pn -sT -p 102,502,2404,20000,44818,47808 &lt;hedef&gt;   # MMS, Modbus, IEC-104, DNP3, EtherNet/IP, BACnet
+nmap --script s7-info,modbus-discover,enip-info,bacnet-info -p 102,502,44818,47808 &lt;hedef&gt;
+plcscan &lt;hedef&gt;                       # PLC parmak izi
+
+# IEC 60870-5-104 (TCP/2404) — istemci / genel sorgulama
+python -c "import c104"               # c104 / lib60870 tabanlı istemciler
+# IEC 61850 MMS (TCP/102) — model gezinme
+# libiec61850 örnekleri: mms_client_example / ied_model_browse</code></pre>
+
+    <h3>Tespit &amp; savunma (mavi takım)</h3>
+    <pre class="term"><code># OT ağını pasif haritala
+grassmarlin                           # pasif ICS ağ haritalama
+zeek -i eth0                          # + ICSNPP ayrıştırıcılar: modbus, dnp3, iec104, 61850
+
+# Az önce yaptığınız adımları tam olarak yakalayın:
+#   - EWS olmayan hostlardan IEC-104 C_IC_NA_1 / C_SC_NA_1
+#   - IEC 61850 LLN0.Mod yazımı (koruma devre dışı)
+suricata -c suricata.yaml -i eth0     # OT/ICS kural setiyle</code></pre>
+
+    <h2>Kaynaklar</h2>
+    <ul class="refs">
+      <li>MITRE ATT&amp;CK for ICS — <a href="https://attack.mitre.org/matrices/ics/" rel="noopener">attack.mitre.org/matrices/ics</a></li>
+      <li>SANS / E-ISAC (2016): <em>Analysis of the Cyber Attack on the Ukrainian Power Grid</em></li>
+      <li>Dragos: <em>CRASHOVERRIDE — Analysis of the Threat to Electric Grid Operations</em></li>
+      <li>ESET: <em>Win32/Industroyer: A new threat for industrial control systems</em></li>
+      <li>CISA — Industroyer / Industroyer2 danışma belgeleri</li>
+    </ul>
+
+    <p class="footer-cta">
+      <a class="btn" href="/substation/">↺ HMI'ya dön</a>
+      <a class="btn" href="/">Ana sayfa</a>
+    </p>
+  </article>
+
+  <style>
+    .debrief { padding-block: var(--space-l) var(--space-xl); }
+    .flag-badge {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem;
+      background: rgba(53,230,212,0.06); border: 1px dashed var(--cyan-dim);
+      border-radius: var(--radius); padding: 0.7rem 1rem; margin: var(--space-m) 0;
+    }
+    .flag-badge .ok { color: var(--cyan); font-weight: 700; }
+    .flag-badge code { color: var(--cyan-bright); }
+    .lede { font-size: var(--step-1); color: var(--text); line-height: 1.5; }
+
+    .table-wrap { overflow-x: auto; margin: var(--space-m) 0; }
+    .killchain { width: 100%; border-collapse: collapse; font-size: var(--step--1); }
+    .killchain th, .killchain td { text-align: left; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .killchain thead th { color: var(--text-dim); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; }
+    .killchain code { color: var(--cyan); }
+
+    .incidents { display: grid; gap: var(--space-m); margin: var(--space-l) 0; }
+    @media (min-width: 780px) { .incidents { grid-template-columns: 1fr 1fr; } }
+    .incident { background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius); padding: var(--space-m); }
+    .incident h2 { margin-top: 0.2rem; font-size: var(--step-1); }
+    .tag-year { color: var(--anomaly); letter-spacing: 0.12em; font-size: var(--step--1); }
+    .incident ul { padding-left: 1.1rem; }
+    .incident .takeaway { color: var(--text-dim); border-top: 1px dashed var(--border); padding-top: 0.6rem; }
+
+    .callout { border-radius: var(--radius); padding: var(--space-s) var(--space-m); margin: var(--space-m) 0; }
+    .callout.warn { background: rgba(255,77,94,0.08); border: 1px solid var(--anomaly-dim); color: var(--text); }
+
+    .term {
+      background: #060d14; border: 1px solid var(--border); border-radius: var(--radius);
+      padding: var(--space-s) var(--space-m); overflow-x: auto;
+      font-family: var(--font-mono); font-size: var(--step--1); line-height: 1.55; color: var(--text-dim);
+    }
+    .term code { color: var(--text-dim); white-space: pre; }
+
+    .refs { font-size: var(--step--1); }
+    .footer-cta { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: var(--space-l); }
+  </style>
+</BaseLayout>

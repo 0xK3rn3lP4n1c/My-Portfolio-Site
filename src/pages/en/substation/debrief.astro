@@ -1,0 +1,165 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { FLAG } from '../../../components/lab/substationEngine';
+---
+<BaseLayout
+  title="Debrief — Blacking out a substation | OT Lab"
+  description="The real story behind the scenario you just replayed: the 2015 BlackEnergy and 2016 Industroyer attacks on Ukraine's power grid — techniques, protocols and defence."
+  noindex={true}
+>
+  <article class="container prose debrief">
+    <p class="eyebrow">OT LAB · DEBRIEF</p>
+    <h1>Blacking out a substation: Ukraine, 2015 &amp; 2016</h1>
+
+    <div class="flag-badge mono">
+      <span class="ok">✓ Lab complete</span>
+      <code>{FLAG}</code>
+    </div>
+
+    <p class="lede">
+      What you just did on the HMI wasn't a game — it really happened, twice. Below is how the steps
+      you ran in the console map onto two landmark attacks on Ukraine's power grid, and where — as a
+      defender — you can break each link of that chain.
+    </p>
+
+    <h2>What you just did</h2>
+    <p>Every command in the console maps to a real OT attack technique:</p>
+    <div class="table-wrap">
+      <table class="killchain">
+        <thead>
+          <tr><th>Console step</th><th>Real technique</th><th>Attack</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>scan</code></td><td>Discovery of OT services (TCP/2404, TCP/102)</td><td>Both</td></tr>
+          <tr><td><code>iec104 interrogate</code></td><td>IEC-104 general interrogation dumps the process image</td><td>Industroyer</td></tr>
+          <tr><td><code>iec61850 write …Mod off</code></td><td>Disabling the protection relay over MMS</td><td>Industroyer (+ CVE-2015-5374)</td></tr>
+          <tr><td><code>iec104 select / execute off</code></td><td>Select-before-operate (SBO) breaker trip command</td><td>Both</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="incidents">
+      <section class="incident">
+        <p class="tag-year mono">23 DECEMBER 2015</p>
+        <h2>BlackEnergy — the hands-on attack</h2>
+        <ul>
+          <li><strong>Impact:</strong> 3 distribution companies (oblenergos), ~230,000 customers, 1–6 hours off.</li>
+          <li><strong>Access:</strong> Spear-phishing (BlackEnergy3 in a macro-laden Office document), credential theft, months of recon, and VPN access into the ICS network.</li>
+          <li><strong>The trip:</strong> Attackers used the operators' <em>own</em> SCADA/HMI clients remotely to open breakers by hand — textbook living-off-the-land.</li>
+          <li><strong>Aftermath:</strong> KillDisk wiped workstations, serial-to-ethernet converters were bricked with malicious firmware, a telephone DoS hit the call centre, field UPSs were tampered with — all to slow recovery.</li>
+        </ul>
+        <p class="takeaway">No protocol malware — just legitimate tools and stolen access. Lesson: <strong>reachability = control</strong>.</p>
+      </section>
+
+      <section class="incident">
+        <p class="tag-year mono">17 DECEMBER 2016</p>
+        <h2>Industroyer / CrashOverride — going automatic</h2>
+        <ul>
+          <li><strong>Impact:</strong> Kyiv's Pivnichna (Northern) substation; roughly a fifth of the city dark for ~1 hour.</li>
+          <li><strong>Novelty:</strong> The first malware to speak <em>grid protocols</em> directly. Modular payloads: IEC 60870-5-101 (serial), IEC 60870-5-104 (TCP/2404), IEC 61850 MMS (TCP/102), OPC DA.</li>
+          <li><strong>Silencing protection:</strong> A DoS module knocked out Siemens SIPROTEC relays (CVE-2015-5374) — exactly like your flipping the protection <code>Mod</code> to off.</li>
+          <li><strong>Autonomy:</strong> It enumerated the environment itself and issued breaker-open commands at scale. In 2022, <strong>Industroyer2</strong> repeated the pattern against a single substation with its IEC-104 config hardcoded.</li>
+        </ul>
+        <p class="takeaway">2016 put 2015's manual work into code. Lesson: <strong>protection can be switched off; the protocol has no authentication</strong>.</p>
+      </section>
+    </div>
+
+    <h2>Why it worked</h2>
+    <ul>
+      <li>OT protocols carry no authentication or encryption by design — whoever can reach them can command them.</li>
+      <li>Flat networks and IT–OT bridges let phishing reach all the way into the control LAN.</li>
+      <li>Protection relays are the last line of defence — and they can be switched off or bricked remotely.</li>
+      <li>Wiped workstations and bricked comms stretched recovery out for hours.</li>
+    </ul>
+
+    <h2>Defender's takeaways</h2>
+    <ul>
+      <li><strong>Segment:</strong> Purdue model, an OT DMZ; move outbound telemetry across a unidirectional gateway / data diode.</li>
+      <li><strong>Deny-by-default east-west:</strong> allow-list IEC-104 / IEC 61850 flows to known engineering-workstation ↔ RTU pairs only.</li>
+      <li><strong>Detection:</strong> alert on control commands from unauthorised sources and on protection changes such as <code>LLN0.Mod</code>; baseline IEC-104 ASDUs and 61850 GOOSE.</li>
+      <li><strong>Hardening:</strong> patch relays (SIPROTEC), disable unused services, protect the EWS, put remote access behind MFA + a jump host.</li>
+      <li><strong>Resilience:</strong> manual/local control fallback, offline backups of RTU and relay configs, rehearsed incident-response runbooks.</li>
+    </ul>
+
+    <div class="callout warn">
+      <strong>⚠ Responsible use.</strong> Never run the commands below against an unauthorised, production
+      OT network. Even active scanning can knock over fragile devices — proceed only with written
+      authorisation and a planned maintenance window, and prefer passive methods.
+    </div>
+
+    <h2>Toolkit / cheat-sheet</h2>
+    <h3>Discovery &amp; enumeration (red team)</h3>
+    <pre class="term"><code># Passive first. Active scans can drop fragile OT devices.
+nmap -Pn -sT -p 102,502,2404,20000,44818,47808 &lt;target&gt;   # MMS, Modbus, IEC-104, DNP3, EtherNet/IP, BACnet
+nmap --script s7-info,modbus-discover,enip-info,bacnet-info -p 102,502,44818,47808 &lt;target&gt;
+plcscan &lt;target&gt;                      # PLC fingerprinting
+
+# IEC 60870-5-104 (TCP/2404) — client / general interrogation
+python -c "import c104"               # c104 / lib60870-based clients
+# IEC 61850 MMS (TCP/102) — model browsing
+# libiec61850 samples: mms_client_example / ied_model_browse</code></pre>
+
+    <h3>Detection &amp; defence (blue team)</h3>
+    <pre class="term"><code># Map the OT estate passively
+grassmarlin                           # passive ICS network mapping
+zeek -i eth0                          # + ICSNPP parsers: modbus, dnp3, iec104, 61850
+
+# Catch the exact steps you just performed:
+#   - IEC-104 C_IC_NA_1 / C_SC_NA_1 from non-EWS hosts
+#   - IEC 61850 LLN0.Mod writes (protection disabled)
+suricata -c suricata.yaml -i eth0     # with an OT/ICS ruleset</code></pre>
+
+    <h2>References</h2>
+    <ul class="refs">
+      <li>MITRE ATT&amp;CK for ICS — <a href="https://attack.mitre.org/matrices/ics/" rel="noopener">attack.mitre.org/matrices/ics</a></li>
+      <li>SANS / E-ISAC (2016): <em>Analysis of the Cyber Attack on the Ukrainian Power Grid</em></li>
+      <li>Dragos: <em>CRASHOVERRIDE — Analysis of the Threat to Electric Grid Operations</em></li>
+      <li>ESET: <em>Win32/Industroyer: A new threat for industrial control systems</em></li>
+      <li>CISA — Industroyer / Industroyer2 advisories</li>
+    </ul>
+
+    <p class="footer-cta">
+      <a class="btn" href="/substation/">↺ Back to the HMI</a>
+      <a class="btn" href="/en/">Home</a>
+    </p>
+  </article>
+
+  <style>
+    .debrief { padding-block: var(--space-l) var(--space-xl); }
+    .flag-badge {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem;
+      background: rgba(53,230,212,0.06); border: 1px dashed var(--cyan-dim);
+      border-radius: var(--radius); padding: 0.7rem 1rem; margin: var(--space-m) 0;
+    }
+    .flag-badge .ok { color: var(--cyan); font-weight: 700; }
+    .flag-badge code { color: var(--cyan-bright); }
+    .lede { font-size: var(--step-1); color: var(--text); line-height: 1.5; }
+
+    .table-wrap { overflow-x: auto; margin: var(--space-m) 0; }
+    .killchain { width: 100%; border-collapse: collapse; font-size: var(--step--1); }
+    .killchain th, .killchain td { text-align: left; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .killchain thead th { color: var(--text-dim); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.08em; }
+    .killchain code { color: var(--cyan); }
+
+    .incidents { display: grid; gap: var(--space-m); margin: var(--space-l) 0; }
+    @media (min-width: 780px) { .incidents { grid-template-columns: 1fr 1fr; } }
+    .incident { background: var(--bg-elev); border: 1px solid var(--border); border-radius: var(--radius); padding: var(--space-m); }
+    .incident h2 { margin-top: 0.2rem; font-size: var(--step-1); }
+    .tag-year { color: var(--anomaly); letter-spacing: 0.12em; font-size: var(--step--1); }
+    .incident ul { padding-left: 1.1rem; }
+    .incident .takeaway { color: var(--text-dim); border-top: 1px dashed var(--border); padding-top: 0.6rem; }
+
+    .callout { border-radius: var(--radius); padding: var(--space-s) var(--space-m); margin: var(--space-m) 0; }
+    .callout.warn { background: rgba(255,77,94,0.08); border: 1px solid var(--anomaly-dim); color: var(--text); }
+
+    .term {
+      background: #060d14; border: 1px solid var(--border); border-radius: var(--radius);
+      padding: var(--space-s) var(--space-m); overflow-x: auto;
+      font-family: var(--font-mono); font-size: var(--step--1); line-height: 1.55; color: var(--text-dim);
+    }
+    .term code { color: var(--text-dim); white-space: pre; }
+
+    .refs { font-size: var(--step--1); }
+    .footer-cta { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: var(--space-l); }
+  </style>
+</BaseLayout>

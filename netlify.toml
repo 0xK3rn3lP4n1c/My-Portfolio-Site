@@ -27,3 +27,17 @@
   for = "/_astro/*"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Hidden "fuzz-only" pages (the OT lab, its debrief, and the decoy). These already carry a
+# `noindex` <meta> and are excluded from the sitemap; the X-Robots-Tag header is defence in
+# depth so a search engine that somehow reaches them still won't index them. They stay fully
+# reachable — the point is discovery by recon, just never via search.
+[[headers]]
+  for = "/backup/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"
+
+[[headers]]
+  for = "/substation/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"

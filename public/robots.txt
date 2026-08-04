@@ -1,4 +1,8 @@
+# omerkaancoskun.com.tr
 User-agent: *
 Allow: /
+
+# Please keep our disclosure policy out of the index.
+Disallow: /.well-known/security.txt
 
 Sitemap: https://omerkaancoskun.com.tr/sitemap-index.xml

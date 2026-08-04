@@ -97,3 +97,24 @@ img, svg, canvas { display: block; max-width: 100%; height: auto; }
   padding: 0.1rem 0.6rem;
   margin: 0.15rem 0.15rem 0 0;
 }
+
+/* Code blocks — Prism token classes styled from this bundled sheet (no inline styles → CSP-safe). */
+pre[class*="language-"], code[class*="language-"] {
+  font-family: var(--font-mono); font-size: var(--step--1); line-height: 1.6;
+  color: var(--text); background: none; tab-size: 2; hyphens: none; white-space: pre;
+}
+pre[class*="language-"] {
+  background: #060d14; border: 1px solid var(--border); border-radius: var(--radius);
+  padding: var(--space-s) var(--space-m); overflow-x: auto; margin-block: var(--space-s);
+}
+:not(pre) > code[class*="language-"] {
+  padding: 0.1rem 0.35rem; border-radius: var(--radius-s); background: var(--bg-elev-2); color: var(--cyan);
+}
+.token.comment, .token.prolog, .token.doctype, .token.cdata { color: var(--text-faint); font-style: italic; }
+.token.punctuation { color: var(--text-dim); }
+.token.keyword, .token.important, .token.atrule { color: var(--anomaly); }
+.token.string, .token.attr-value, .token.char, .token.inserted, .token.regex { color: var(--cyan); }
+.token.function, .token.class-name, .token.selector { color: var(--blue); }
+.token.number, .token.boolean, .token.constant, .token.symbol, .token.tag, .token.property { color: var(--cyan-bright); }
+.token.operator, .token.entity, .token.url, .token.variable, .token.attr-name { color: var(--text); }
+.token.deleted { color: var(--anomaly-dim); }

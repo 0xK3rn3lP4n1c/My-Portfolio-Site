@@ -1,0 +1,15 @@
+# ──────────────────────────────────────────────────────────────
+#  If you're reading this, you already think the way we do.
+# ──────────────────────────────────────────────────────────────
+Contact: mailto:omerkaan@omerkaancoskun.com.tr
+Expires: 2027-08-01T00:00:00.000Z
+Preferred-Languages: tr, en
+Canonical: https://omerkaancoskun.com.tr/.well-known/security.txt
+Policy: https://omerkaancoskun.com.tr/.well-known/security.txt
+
+# Responsible disclosure welcome. Good-faith research always answered.
+#
+# -- internal note (TODO: remove before the next audit) -----------
+#  The old HMI config backups from the 2016 migration are still
+#  sitting in the public web root under  /backup/  . Clear those out.
+# -----------------------------------------------------------------

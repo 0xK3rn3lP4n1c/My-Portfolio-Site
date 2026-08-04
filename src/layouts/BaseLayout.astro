@@ -7,9 +7,11 @@ import { getLangFromUrl, useTranslations } from '../i18n/ui';
 interface Props {
   title: string;
   description?: string;
+  /** Keep this route out of search indexes (used by the unlinked, fuzz-only pages). */
+  noindex?: boolean;
 }
 
-const { title, description = 'Ömer Kaan Coşkun — cybersecurity / OT & network-security portfolio.' } = Astro.props;
+const { title, description = 'Ömer Kaan Coşkun — cybersecurity / OT & network-security portfolio.', noindex = false } = Astro.props;
 const lang = getLangFromUrl(Astro.url);
 const t = useTranslations(lang);
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
@@ -22,6 +24,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 

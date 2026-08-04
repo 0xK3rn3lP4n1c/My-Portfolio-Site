@@ -1,0 +1,16 @@
+Operator handover — East 110 kV substation
+-------------------------------------------
+
+After the December 2015 incident we were told to air-gap the control LAN.
+We mostly did. The operator HMI, though, still has a browser panel that
+is reachable from this host while the new jump box is being provisioned.
+
+It is parked at:
+
+    /substation/
+
+Treat it as live. The breakers that panel talks to are real — well, they
+were. Do not "test" the trip logic. Someone already tried exactly that,
+from the outside, on 2016-12-17. It did not go well for the grid.
+
+    - O.
