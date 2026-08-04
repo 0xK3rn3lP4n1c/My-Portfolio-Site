@@ -1,97 +1,78 @@
 {
-  "$ref": "#/definitions/projects",
-  "definitions": {
-    "projects": {
-      "type": "object",
-      "properties": {
-        "title": {
-          "type": "string"
-        },
-        "description": {
-          "type": "string"
-        },
-        "date": {
-          "anyOf": [
-            {
-              "type": "string",
-              "format": "date-time"
-            },
-            {
-              "type": "string",
-              "format": "date"
-            },
-            {
-              "type": "integer",
-              "format": "unix-time"
-            }
-          ]
-        },
-        "tags": {
-          "type": "array",
-          "items": {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tags": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "lang": {
+      "default": "tr",
+      "type": "string",
+      "enum": [
+        "tr",
+        "en"
+      ]
+    },
+    "draft": {
+      "default": false,
+      "type": "boolean"
+    },
+    "featured": {
+      "default": false,
+      "type": "boolean"
+    },
+    "repo": {
+      "type": "string",
+      "format": "uri"
+    },
+    "demo": {
+      "type": "string",
+      "format": "uri"
+    },
+    "embed": {
+      "type": "string",
+      "enum": [
+        "ronin"
+      ]
+    },
+    "gallery": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "src": {
             "type": "string"
           },
-          "default": []
-        },
-        "lang": {
-          "type": "string",
-          "enum": [
-            "tr",
-            "en"
-          ],
-          "default": "tr"
-        },
-        "draft": {
-          "type": "boolean",
-          "default": false
-        },
-        "featured": {
-          "type": "boolean",
-          "default": false
-        },
-        "repo": {
-          "type": "string",
-          "format": "uri"
-        },
-        "demo": {
-          "type": "string",
-          "format": "uri"
-        },
-        "embed": {
-          "type": "string",
-          "enum": [
-            "ronin"
-          ]
-        },
-        "gallery": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "src": {
-                "type": "string"
-              },
-              "title": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "src"
-            ],
-            "additionalProperties": false
+          "title": {
+            "type": "string"
           }
         },
-        "$schema": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "title",
-        "description",
-        "date"
-      ],
-      "additionalProperties": false
+        "required": [
+          "src"
+        ]
+      }
+    },
+    "$schema": {
+      "type": "string"
     }
   },
-  "$schema": "http://json-schema.org/draft-07/schema#"
+  "required": [
+    "title",
+    "description",
+    "date"
+  ]
 }

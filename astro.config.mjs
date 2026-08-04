@@ -10,7 +10,7 @@ export default defineConfig({
   // scripts/styles it generates (some hoisted scripts get inlined when small). This
   // keeps a strict `script-src 'self'` without a fragile hand-maintained hash.
   // `frame-ancestors` can't live in a <meta> CSP, so it stays a header in netlify.toml.
-  experimental: {
+  security: {
     csp: {
       directives: [
         "default-src 'self'",
